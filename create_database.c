@@ -1,12 +1,43 @@
-/***************************************************************************************************************************************************
-*Author         :Emertxe(http://www.emertxe.com)
-*Date           :Mon 22 May 2017 14:04:05 IST
-*File           :create_database.c
-*Title          :To create the database
-*Description    :The list of the files can be provided by storing all the file names in another file, FileList the names of the files which 
-		:are to be documented are provided by this file. When a file is added or removed, FileList is changed accordingly.
-		:So read the file names and start indexing.
-****************************************************************************************************************************************************/
+/************************************************************************************************************
+* Author         : APSAR PINJARI
+* Date           : 03 Nov 2026
+* File           : create_database.c
+* Title          : To create the inverted search database
+* Description    : This function is used to create an inverted search database using the list of input files.
+*                  The file list contains the names of all input files that are to be indexed. Each file is
+*                  opened and its contents are read word by word.
+*
+*                  1. HASH TABLE:
+*                     The database consists of 26 hash table indexes (0 to 25), representing alphabets
+*                     from 'a' to 'z'. Each word is stored at an index based on its first character.
+*
+*                  2. MAIN NODE:
+*                     Each main node stores a unique word, the number of files in which the word occurs
+*                     (file_count), a pointer to the next main node (link), and a pointer to its sub-node
+*                     list (sub_link).
+*
+*                  3. SUB NODE:
+*                     Each sub node stores the name of the file in which the word occurs, the number of
+*                     times the word appears in that file (word_count), and a pointer to the next sub node.
+*
+*                  4. DATABASE CREATION:
+*                     If a word is encountered for the first time, a new main node is created and inserted
+*                     into the appropriate hash table index. A new sub node is also created to store the
+*                     file name and its word count.
+*
+*                     If the word already exists in the database and belongs to the same file, the
+*                     corresponding sub node's word_count is incremented.
+*
+*                     If the word already exists but is found in a different file, a new sub node is
+*                     created for that file and the main node's file_count is incremented.
+*
+*                  5. LINKING:
+*                     Main nodes are linked together at each hash table index. Similarly, sub nodes are
+*                     linked to their corresponding main node to maintain file-wise word occurrence details.
+*
+*                  The final database provides an efficient structure for searching, displaying, and
+*                  saving word occurrence information across multiple input files.
+************************************************************************************************************/
 
 #include "inverted_search.h"
 

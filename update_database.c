@@ -1,4 +1,42 @@
-
+/***************************************************************************************************************************************************
+*Author         : APSAR PINJARI
+*Date           : 03 Nov 2026
+*File           : update_database.c
+*Title          : To update the inverted search database from a backup file.
+*Description    : This file contains the function to restore or update the inverted search database
+                 : using the previously saved backup file. The backup file contains the hash table
+                 : index, unique words, file counts, filenames, and their respective word counts.
+                 :
+                 : 1. BACKUP FILE OPENING:
+                 :    Opens the backup file in read mode to retrieve the previously saved database
+                 :    records. If the file cannot be opened, FAILURE is returned.
+                 :
+                 : 2. RECORD READING:
+                 :    Reads the backup file line by line and identifies the hash table index using
+                 :    the '#' symbol. The index is validated to ensure it belongs to the range 0 to 25.
+                 :
+                 : 3. RECORD VALIDATION:
+                 :    Validates the database records to ensure that the stored word, file count,
+                 :    filenames, and word counts follow the expected backup file format.
+                 :
+                 : 4. HASH TABLE RESTORATION:
+                 :    Uses the validated hash table index to insert each word into the appropriate
+                 :    hash table linked list.
+                 :
+                 : 5. MAIN NODE CREATION:
+                 :    Creates main nodes to store unique words and their corresponding file counts.
+                 :
+                 : 6. SUB NODE CREATION:
+                 :    Creates sub nodes to store filenames and their respective word occurrence
+                 :    counts, linking them to the corresponding main node.
+                 :
+                 : 7. DATABASE UPDATE:
+                 :    Reconstructs the inverted search database from the backup records, allowing
+                 :    previously saved word information to be restored and accessed again.
+                 :
+                 : Returns SUCCESS when the database is updated successfully; otherwise, returns
+                 : FAILURE if the backup file or its records are invalid.
+***************************************************************************************************************************************************/
 #include "inverted_search.h"
 
 int update_database(Main_node *hash_table[26], char *filename)

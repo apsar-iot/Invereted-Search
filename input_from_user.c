@@ -1,11 +1,29 @@
+
 /***************************************************************************************************************************************************
-*Author         :Emertxe(http://www.emertxe.com)
-*Date           :Mon 22 May 2017 14:20:10 IST
-*File           :input_from_user.c
-*Title          :To read the input from the user.
-*Description    :The search phase is going to begin. To search, collect the user input text. It should be
-		:stored in a character string.
-****************************************************************************************************************************************************/
+*Author         : APSAR PINJARI
+*Date           : 03 Nov 2026
+*File           : input_from_user.c
+*Title          : To validate the input files provided by the user.
+*Description    : Before creating the inverted search database, the input files provided by the user must
+                 : be validated to ensure that only valid text files are processed.
+                 :
+                 : 1. FILE EXTENSION VALIDATION:
+                 :    Checks whether the given filename has a valid ".txt" extension using string
+                 :    operations. If the extension is missing or does not match ".txt", FAILURE is returned.
+                 :
+                 : 2. FILE EXISTENCE VALIDATION:
+                 :    Attempts to open the given file in read mode to verify whether the file exists
+                 :    and is accessible.
+                 :
+                 : 3. EMPTY FILE VALIDATION:
+                 :    Checks the size of the file by moving the file pointer to the end using fseek()
+                 :    and retrieving its size using ftell(). If the file size is zero or less, the file
+                 :    is considered empty and FAILURE is returned.
+                 :
+                 : 4. VALIDATION RESULT:
+                 :    Returns SUCCESS when the file has a valid extension, exists, and contains data.
+                 :    Otherwise, FAILURE is returned.
+***************************************************************************************************************************************************/
 #include "inverted_search.h"
 
 // Validate .txt extension

@@ -1,14 +1,23 @@
 /***************************************************************************************************************************************************
-*Author         :Emertxe(http://www.emertxe.com)
-*Date           :Mon 22 May 2017 16:06:15 IST
-*File           :display_output.c
-*Title          :To display  the results.
-*Description    :When all the words are searched the ouput list is formed. In this the file with max count
-		:(representing maximum word match ) can be selected and displayed. For advanced searched,
-		:(weightage of words stored in database linkedlist) can also be used. So the results will be more
-		:accurate.
-****************************************************************************************************************************************************/
-
+*Author         : APSAR PINJARI
+*Date           : 03 Nov 2026
+*File           : display_output.c
+*Title          : To display the inverted search database.
+*Description    : The database created using the 26-index hash table contains unique words along with their
+                 : corresponding file names and word occurrence counts. Each main node stores a unique word
+                 : and the number of files in which that word is present. The sub-node linked list stores the
+                 : file names and the number of occurrences of each word in the respective files.
+                 :
+                 : This function traverses all 26 hash table indexes and displays the database details in
+                 : a tabular format, including the index, word, file count, file name, and word count.
+                 :
+                 : For each main node, the corresponding sub-node list is traversed to display all files
+                 : containing that word. The index, word, and file count are displayed only once, while
+                 : subsequent file names and their word counts are displayed in the following rows.
+                 :
+                 : If the database is empty, DATA_NOT_FOUND is returned; otherwise, SUCCESS is returned
+                 : after successfully displaying the database.
+***************************************************************************************************************************************************/
 #include "inverted_search.h"
 
 int display_database(Main_node *hash_table[26])
