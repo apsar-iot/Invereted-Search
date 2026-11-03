@@ -23,6 +23,7 @@
 int display_database(Main_node *hash_table[26])
 {
     int empty = 1;
+    int serial = 0;
 
     printf("\n%-10s %-15s %-12s %-15s %-12s\n",
            "[INDEX]", "WORD", "FILE COUNT",
@@ -33,6 +34,12 @@ int display_database(Main_node *hash_table[26])
     for (int i = 0; i < 26; i++)
     {
         Main_node *main = hash_table[i];
+
+        if (main == NULL)
+            continue;
+
+        serial++;
+        int first_index = 1;
 
         while (main != NULL)
         {
@@ -45,12 +52,26 @@ int display_database(Main_node *hash_table[26])
             {
                 if (first)
                 {
-                    printf("%-10d %-15s %-12d %-15s %-12d\n",
-                           i,
-                           main->word,
-                           main->file_count,
-                           sub->filename,
-                           sub->word_count);
+                    if (first_index)
+                    {
+                        printf("%-10d %-15s %-12d %-15s %-12d\n",
+                               serial,
+                               main->word,
+                               main->file_count,
+                               sub->filename,
+                               sub->word_count);
+
+                        first_index = 0;
+                    }
+                    else
+                    {
+                        printf("%-10s %-15s %-12d %-15s %-12d\n",
+                               "",
+                               main->word,
+                               main->file_count,
+                               sub->filename,
+                               sub->word_count);
+                    }
 
                     first = 0;
                 }
@@ -64,9 +85,10 @@ int display_database(Main_node *hash_table[26])
                 sub = sub->link;
             }
 
-            printf("\n");
             main = main->link;
         }
+
+        printf("\n");
     }
 
     if (empty)
