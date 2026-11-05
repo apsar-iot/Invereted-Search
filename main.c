@@ -42,92 +42,56 @@
                  : The main function coordinates all the modules of the project and manages the
                  : overall execution flow of the Inverted Search application.
 ***************************************************************************************************************************************************/
+
 #include "inverted_search.h"
 
-int main(int argc, char *argv[])
+/* Free temporary file linked list */
+static void free_file_list(Flist *head)
+{
+    while (head != NULL)
+    {
+        Flist *temp = head;
+        head = head->link;
+        free(temp);
+    }
+}
+
+/* Append newly processed files to the permanent file list */
+static void append_file_list(Flist **head, Flist *new_files)
+{
+    if (*head == NULL)
+    {
+        *head = new_files;
+        return;
+    }
+
+    Flist *temp = *head;
+
+    while (temp->link != NULL)
+        temp = temp->link;
+
+    temp->link = new_files;
+}
+
+int main(void)
 {
     Flist *f_head = NULL;
     Main_node *hash_table[26] = {NULL};
 
-    int i;
     int option;
+    int file_count;
     char word[50];
     char filename[100];
-
-    /* Step 1: Check command-line arguments */
-
-    if (argc < 2)
-    {
-        printf("Error: Please provide input .txt files\n");
-        printf("Usage: ./a.out file1.txt file2.txt ...\n");
-        return FAILURE;
-    }
-
-    printf("Total input files: %d\n", argc - 1);
-
-    /* Step 2: Validate input files */
-
-    for (i = 1; argv[i] != NULL; i++)
-    {
-        /* Validate extension */
-        if (validate_file(argv[i]) == FAILURE)
-        {
-            printf("Invalid extension: %s\n", argv[i]);
-            continue;
-        }
-
-        /* Check file existence and empty file */
-        if (check_empty_file(argv[i]) == FAILURE)
-        {
-            printf("File does not exist or is empty: %s\n", argv[i]);
-            continue;
-        }
-
-        /* Check duplicate filename */
-        if (check_duplicate(f_head, argv[i]) == SUCCESS)
-        {
-            printf("Duplicate file: %s\n", argv[i]);
-            continue;
-        }
-
-        /* Insert filename into SLL */
-        if (create_index_list(&f_head, argv[i]) == SUCCESS)
-        {
-            printf("File added successfully: %s\n", argv[i]);
-        }
-        else
-        {
-            printf("Failed to add file: %s\n", argv[i]);
-        }
-    }
-
-    /* Step 3: Check whether any valid files exist */
-
-    if (f_head == NULL)
-    {
-        printf("Error: No valid input files found\n");
-        return FAILURE;
-    }
-
-    /* Step 4: Create the inverted database */
-
-    if (create_database(f_head, hash_table) == FAILURE)
-    {
-        printf("Error: Database creation failed\n");
-        return FAILURE;
-    }
-
-    printf("\nDatabase created successfully!\n");
-
-    /* Step 5: Display menu */
 
     while (1)
     {
         printf("\n========== INVERTED SEARCH MENU ==========\n");
-        printf("1. Display Database\n");
-        printf("2. Search Word\n");
-        printf("3. Save Database\n");
-        printf("4. Exit\n");
+        printf("1. Create Database\n");
+        printf("2. Display Database\n");
+        printf("3. Update Database\n");
+        printf("4. Search Word\n");
+        printf("5. Save Database\n");
+        printf("6. Exit\n");
         printf("Enter your choice: ");
 
         if (scanf("%d", &option) != 1)
@@ -144,41 +108,123 @@ int main(int argc, char *argv[])
         switch (option)
         {
             case 1:
+            {
+                Flist *new_files = NULL;
+
+                printf("Enter number of files to add: ");
+
+                if (scanf("%d", &file_count) != 1 ||
+                    file_count <= 0)
+                {
+                    printf("Invalid number of files.\n");
+                    free_file_list(new_files);
+                    break;
+                }
+
+                for (int i = 0; i < file_count; i++)
+                {
+                    printf("Enter filename %d: ", i + 1);
+
+                    if (scanf("%99s", filename) != 1)
+                    {
+                        printf("Unable to read filename.\n");
+                        continue;
+                    }
+
+                    if (validate_file(filename) == FAILURE)
+                    {
+                        printf("Invalid file extension: %s\n", filename);
+                        continue;
+                    }
+
+                    if (check_empty_file(filename) == FAILURE)
+                    {
+                        printf("File does not exist or is empty: %s\n",
+                               filename);
+                        continue;
+                    }
+
+                    if (check_duplicate(f_head, filename) == SUCCESS ||
+                        check_duplicate(new_files, filename) == SUCCESS)
+                    {
+                        printf("Duplicate file: %s\n", filename);
+                        continue;
+                    }
+
+                    if (create_index_list(&new_files, filename) == SUCCESS)
+                    {
+                        printf("File added to processing list: %s\n",
+                               filename);
+                    }
+                    else
+                    {
+                        printf("Memory allocation failed.\n");
+                    }
+                }
+
+                if (new_files == NULL)
+                {
+                    printf("No new valid files to process.\n");
+                    break;
+                }
+
+                /* Add only new files to the existing database */
+                if (create_database(new_files, hash_table) == SUCCESS)
+                {
+                    append_file_list(&f_head, new_files);
+                    new_files = NULL;
+
+                    printf("\nDatabase created/updated successfully!\n");
+
+                    /* Automatically refresh readable database */
+                    if (write_database_file(hash_table) == SUCCESS)
+                        printf("database.txt refreshed successfully.\n");
+                    else
+                        printf("Warning: Could not refresh database.txt.\n");
+                }
+                else
+                {
+                    printf("Database creation failed.\n");
+                }
+
+                free_file_list(new_files);
+                break;
+            }
+
+            case 2:
                 display_database(hash_table);
                 break;
 
-            case 2:
-                printf("Enter the word to search: ");
-
-                if (scanf("%49s", word) == 1)
-                {
-                    search_database(hash_table, word);
-                }
-                else
-                {
-                    printf("Unable to read search word\n");
-                }
-                break;
-
             case 3:
-                printf("Enter the filename to save: ");
+                if (update_database(hash_table, "backup.txt") == SUCCESS)
+                {
+                    printf("Database restored successfully.\n");
 
-                if (scanf("%99s", filename) == 1)
-                {
-                   save_database(hash_table);
-                }
-                else
-                {
-                    printf("Unable to read filename\n");
+                    write_database_file(hash_table);
                 }
                 break;
 
             case 4:
+                printf("Enter the word to search: ");
+
+                if (scanf("%49s", word) == 1)
+                    search_database(hash_table, word);
+                else
+                    printf("Unable to read search word.\n");
+
+                break;
+
+            case 5:
+                save_database(hash_table);
+                break;
+
+            case 6:
                 printf("Exiting Inverted Search...\n");
+                free_file_list(f_head);
                 return SUCCESS;
 
             default:
-                printf("Invalid choice. Select 1 to 4.\n");
+                printf("Invalid choice. Select 1 to 6.\n");
         }
     }
 

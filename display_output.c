@@ -18,18 +18,20 @@
                  : If the database is empty, DATA_NOT_FOUND is returned; otherwise, SUCCESS is returned
                  : after successfully displaying the database.
 ***************************************************************************************************************************************************/
+
 #include "inverted_search.h"
 
-int display_database(Main_node *hash_table[26])
+/* Common function to display or write the database */
+static int print_database(FILE *fp, Main_node *hash_table[26])
 {
     int empty = 1;
     int serial = 0;
 
-    printf("\n%-10s %-15s %-12s %-15s %-12s\n",
-           "[INDEX]", "WORD", "FILE COUNT",
-           "FILE NAME", "WORD COUNT");
+    fprintf(fp, "\n%-10s %-15s %-12s %-15s %-12s\n",
+            "[INDEX]", "WORD", "FILE COUNT",
+            "FILE NAME", "WORD COUNT");
 
-    printf("----------------------------------------------------------------\n");
+    fprintf(fp, "----------------------------------------------------------------\n");
 
     for (int i = 0; i < 26; i++)
     {
@@ -54,32 +56,32 @@ int display_database(Main_node *hash_table[26])
                 {
                     if (first_index)
                     {
-                        printf("%-10d %-15s %-12d %-15s %-12d\n",
-                               serial,
-                               main->word,
-                               main->file_count,
-                               sub->filename,
-                               sub->word_count);
+                        fprintf(fp, "%-10d %-15s %-12d %-15s %-12d\n",
+                                serial,
+                                main->word,
+                                main->file_count,
+                                sub->filename,
+                                sub->word_count);
 
                         first_index = 0;
                     }
                     else
                     {
-                        printf("%-10s %-15s %-12d %-15s %-12d\n",
-                               "",
-                               main->word,
-                               main->file_count,
-                               sub->filename,
-                               sub->word_count);
+                        fprintf(fp, "%-10s %-15s %-12d %-15s %-12d\n",
+                                "",
+                                main->word,
+                                main->file_count,
+                                sub->filename,
+                                sub->word_count);
                     }
 
                     first = 0;
                 }
                 else
                 {
-                    printf("%-10s %-15s %-12s %-15s %-12d\n",
-                           "", "", "", sub->filename,
-                           sub->word_count);
+                    fprintf(fp, "%-10s %-15s %-12s %-15s %-12d\n",
+                            "", "", "", sub->filename,
+                            sub->word_count);
                 }
 
                 sub = sub->link;
@@ -88,14 +90,41 @@ int display_database(Main_node *hash_table[26])
             main = main->link;
         }
 
-        printf("\n");
+        fprintf(fp, "\n");
     }
 
     if (empty)
     {
-        printf("Database is empty!\n");
+        fprintf(fp, "Database is empty!\n");
         return DATA_NOT_FOUND;
     }
 
+    return SUCCESS;
+}
+
+/* Display database in terminal */
+int display_database(Main_node *hash_table[26])
+{
+    return print_database(stdout, hash_table);
+}
+
+/* Automatically create or refresh database.txt */
+int write_database_file(Main_node *hash_table[26])
+{
+    FILE *fp = fopen("database.txt", "w");
+
+    if (fp == NULL)
+    {
+        printf("Error: Unable to create database.txt\n");
+        return FAILURE;
+    }
+
+    int status = print_database(fp, hash_table);
+
+    fclose(fp);
+
+    printf("database.txt refreshed successfully!\n");
+
+    /* File creation is successful even if database is empty */
     return SUCCESS;
 }

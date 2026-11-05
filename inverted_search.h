@@ -50,6 +50,10 @@ void print_list(Flist *head);
 int create_database(Flist *f_head, Main_node *hash_table[26]);
 int display_database(Main_node *hash_table[26]);
 int search_database(Main_node *hash_table[26], char *word);
+
+/* Database file operations */
+int write_database_file(Main_node *hash_table[26]);
 int save_database(Main_node *hash_table[26]);
 int update_database(Main_node *hash_table[26], char *filename);
+
 #endif
